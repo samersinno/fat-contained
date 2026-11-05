@@ -86,4 +86,14 @@ WORKDIR /firmware-analysis-toolkit
 # RUN echo 'fat:rootpass' | chpasswd
 # RUN echo 'fat ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
+RUN useradd -m fat --uid=${UID} && \
+    usermod -aG sudo fat && \
+    echo 'fat ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/fat && \
+    chmod 0440 /etc/sudoers.d/fat && \
+    chown -R fat:fat /firmware-analysis-toolkit /firmware
+
+USER fat
+
+HEALTHCHECK --interval=60s --timeout=5s --retries=3 CMD test -x /entrypoint.sh || exit 1
+
 CMD ["/entrypoint.sh"]
